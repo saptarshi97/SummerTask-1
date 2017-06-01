@@ -9,11 +9,4 @@
         android:onClick="addToList">
     </item>
 
-    <item
-        android:id="@+id/remove_from_list"
-        android:title="Remove list item"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_clear_black_24dp">
-    </item>
-
 </menu>

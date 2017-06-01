@@ -12,6 +12,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     List<AddData> data = new ArrayList<>();
     String first="",second="";
+    int position;
+    boolean removeMethodInvoked=false;
     TextView test;
 
     @Override
@@ -78,12 +82,22 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    private void loadAdapter(){
-        List<AddData> data = fillWithData();
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        DataAdapter adapter = new DataAdapter(data);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    private void loadAdapter() {
+        if (!removeMethodInvoked) {
+            List<AddData> data = fillWithData();
+            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+            DataAdapter adapter = new DataAdapter(data);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        }
+        else {
+             //List<AddData> data= removeData();
+            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+            DataAdapter adapter = new DataAdapter(data);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            removeMethodInvoked=false;
+        }
     }
     public List<AddData> fillWithData(){
 
@@ -91,7 +105,16 @@ public class MainActivity extends AppCompatActivity {
             data.add(new AddData(first, second));
         }
         return data;
-
-
     }
+
+    /*public void removeItem(int p){
+        //LinearLayout vwParentRow = (LinearLayout)v.getParent();
+        removeMethodInvoked=true;
+         position=p;
+         loadAdapter();
+    }
+    public List<AddData> removeData(){
+        data.remove(position);
+        return data;
+    }*/
 }
