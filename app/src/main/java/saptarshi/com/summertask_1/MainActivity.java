@@ -19,18 +19,24 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 public class MainActivity extends AppCompatActivity {
     List<AddData> data = new ArrayList<>();
     String first="",second="";
     int position;
     boolean removeMethodInvoked=false;
     TextView test;
+    private Realm mDatabase;
+    DataAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        loadAdapter();
+        mDatabase=Realm.getDefaultInstance();
+        loadAdapter();  //TO-DO: Database filling, ie Saving, Retrieving and updating.
 
     }
     @Override
@@ -83,38 +89,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void loadAdapter() {
-        if (!removeMethodInvoked) {
             List<AddData> data = fillWithData();
             RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-            DataAdapter adapter = new DataAdapter(data);
+            adapter = new DataAdapter(data,mDatabase);
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        }
-        else {
-             //List<AddData> data= removeData();
-            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-            DataAdapter adapter = new DataAdapter(data);
-            recyclerView.setAdapter(adapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            removeMethodInvoked=false;
-        }
+
     }
     public List<AddData> fillWithData(){
-
+        mDatabase.beginTransaction();
+        mDatabase.where(AddData.class).findAll();
         if(!(first.equals("") && second.equals(""))) {
             data.add(new AddData(first, second));
         }
+        mDatabase.copyToRealm(data);
+        mDatabase.commitTransaction();
+        if(mDatabase!=null) {
+            RealmResults<AddData> results = mDatabase.where(AddData.class).findAll();
+            if (!results.isEmpty()){
+                data.clear();
+                data.addAll(results);
+            }
+        }
         return data;
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        mDatabase.close();
+        mDatabase=null;
     }
 
-    /*public void removeItem(int p){
-        //LinearLayout vwParentRow = (LinearLayout)v.getParent();
-        removeMethodInvoked=true;
-         position=p;
-         loadAdapter();
-    }
-    public List<AddData> removeData(){
-        data.remove(position);
-        return data;
-    }*/
 }

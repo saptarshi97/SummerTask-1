@@ -13,13 +13,19 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     private List<AddData> list;
+    private Realm mDatabase;
 
 
-    public DataAdapter(List<AddData> list) {
+    public DataAdapter(List<AddData> list, Realm mDatabase) {
+
         this.list = list;
+        this.mDatabase=mDatabase;
     }
 
     @Override
@@ -58,6 +64,14 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             int position= getPosition();
             list.remove(position);
             notifyDataSetChanged();
+            if(mDatabase==null)
+                return;
+            else {
+                mDatabase.beginTransaction();
+                final RealmResults<AddData> results = mDatabase.where(AddData.class).findAll();
+                results.get(position).deleteFromRealm();
+                mDatabase.commitTransaction();
+            }
         }
     }
 }
